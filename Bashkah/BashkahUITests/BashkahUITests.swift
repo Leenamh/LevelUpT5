@@ -1,13 +1,13 @@
 //
-//  T5UITests.swift
-//  T5UITests
+//  BashkahUITests.swift
+//  BashkahUITests
 //
 //  Created by Najd Alsabi on 15/08/1447 AH.
 //
 
 import XCTest
 
-final class T5UITests: XCTestCase {
+final class BashkahUITests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.

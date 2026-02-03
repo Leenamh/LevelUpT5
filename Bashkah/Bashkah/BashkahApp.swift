@@ -1,6 +1,6 @@
 //
-//  T5App.swift
-//  T5
+//  BashkahApp.swift
+//  Bashkah
 //
 //  Created by Najd Alsabi on 15/08/1447 AH.
 //
@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct T5App: App {
+struct BashkahApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()

@@ -1,13 +1,13 @@
 //
-//  T5UITestsLaunchTests.swift
-//  T5UITests
+//  BashkahUITestsLaunchTests.swift
+//  BashkahUITests
 //
 //  Created by Najd Alsabi on 15/08/1447 AH.
 //
 
 import XCTest
 
-final class T5UITestsLaunchTests: XCTestCase {
+final class BashkahUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true
