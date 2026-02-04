@@ -7,8 +7,9 @@
 
 import Foundation
 
-struct TTPlayer: Identifiable, Equatable {
+struct TTPlayer: Identifiable, Equatable, Hashable {
     let id = UUID()
     let name: String
 }
+
 

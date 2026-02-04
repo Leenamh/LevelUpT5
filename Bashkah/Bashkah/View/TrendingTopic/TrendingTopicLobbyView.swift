@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct TrendingTopicLobbyView: View {
+    @Binding var path: NavigationPath
     @StateObject var vm: TrendingTopicLobbyVM
 
     var body: some View {
@@ -65,8 +66,8 @@ struct TrendingTopicLobbyView: View {
 
                 Spacer()
 
-                NavigationLink {
-                    TrendingTopicGameView(vm: TrendingTopicGameVM())
+                Button {
+                    path.append(AppRoute.trendingGame)
                 } label: {
                     Text("ابدأ")
                         .font(.system(size: 18, weight: .semibold))
@@ -80,17 +81,19 @@ struct TrendingTopicLobbyView: View {
                 Spacer().frame(height: 10)
             }
             .padding(.horizontal, 22)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Image(systemName: "chevron.backward")
-                        .foregroundStyle(.black)
-                        .padding(.leading,20)
-                }
-            }
         }
         .environment(\.layoutDirection, .rightToLeft)
         .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    if !path.isEmpty { path.removeLast() } // back to Join/Start
+                } label: {
+                    Image(systemName: "chevron.backward")
+                        .foregroundStyle(.black)
+                        .padding(.leading, 20)
+                }
+            }
+        }
     }
-        
 }
-

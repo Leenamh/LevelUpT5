@@ -7,24 +7,23 @@
 
 import SwiftUI
 
+
 struct TrendingTopicStartView: View {
+    @Binding var path: NavigationPath
     @StateObject var vm = TrendingTopicStartVM()
-    
+
     var body: some View {
         ZStack {
             Color("Background").ignoresSafeArea()
-            
+
             VStack(spacing: 18) {
-                
-                
-                                
+
                 Image("TrendingTopicsPage")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 270, height: 250)
                     .padding(.vertical, 60)
-                
-                
+
                 TextField("ادخل اسمك", text: $vm.name)
                     .multilineTextAlignment(.center)
                     .padding(.vertical, 12)
@@ -35,9 +34,8 @@ struct TrendingTopicStartView: View {
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(Color("DarkBlue"), lineWidth: 2)
                     )
-                
-                NavigationLink {
-                    // Mock room for UI testing
+
+                Button {
                     let room = TTRoom(
                         code: "55555",
                         players: [
@@ -49,7 +47,7 @@ struct TrendingTopicStartView: View {
                             TTPlayer(name: "نجد")
                         ]
                     )
-                    TrendingTopicLobbyView(vm: TrendingTopicLobbyVM(room: room, isHost: true))
+                    path.append(AppRoute.trendingLobby(room: room, isHost: true))
                 } label: {
                     Text("ابدأ لعبة جديدة")
                         .font(.system(size: 18, weight: .semibold))
@@ -60,9 +58,9 @@ struct TrendingTopicStartView: View {
                 }
                 .disabled(!vm.canStart)
                 .padding(.top, 20)
-                
-                NavigationLink {
-                    TrendingTopicJoinView(vm: TrendingTopicJoinVM(displayName: vm.name))
+
+                Button {
+                    path.append(AppRoute.trendingJoin(name: vm.name))
                 } label: {
                     Text("الانضمام")
                         .font(.system(size: 18, weight: .semibold))
@@ -71,17 +69,25 @@ struct TrendingTopicStartView: View {
                         .background(vm.canStart ? Color("DarkBlue") : Color("DisabledButton"))
                         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
-                
+
                 Spacer()
             }
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+            .environment(\.layoutDirection, .rightToLeft)
+        }
+        // Start screen usually shouldn't have a back button.
+        // If you want it to go back to HomePage:
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    // go back to HomePage
+                    path.removeLast(path.count)
+                } label: {
                     Image(systemName: "chevron.backward")
                         .foregroundStyle(.black)
-                        .padding(.leading,20)
+                        .padding(.leading, 20)
                 }
             }
-            .environment(\.layoutDirection, .rightToLeft)
         }
     }
 }

@@ -7,8 +7,9 @@
 
 import Foundation
 
-struct TTRoom: Equatable {
+struct TTRoom: Equatable, Hashable {
     var code: String
     var players: [TTPlayer]
 }
+
 

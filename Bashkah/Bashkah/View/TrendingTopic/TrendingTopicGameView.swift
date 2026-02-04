@@ -7,32 +7,41 @@
 
 import SwiftUI
 
+
 struct TrendingTopicGameView: View {
     @StateObject var vm: TrendingTopicGameVM
+    @Binding var path: NavigationPath
 
     var body: some View {
         ZStack {
             Color("Background").ignoresSafeArea()
 
-            VStack(spacing: 14) {
+            VStack(spacing: 18) {
 
+                // Top bar
                 HStack {
-                    Image(systemName: "rectangle.portrait.and.arrow.right")
-                        .foregroundStyle(.black)
-
-                    Spacer()
-
+                    // Coins on left (as in your screenshot)
                     HStack(spacing: 6) {
+                        Image(systemName: "bitcoinsign.circle.fill")
+                            .foregroundStyle(.yellow)
                         Text("\(vm.coins)")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundStyle(.yellow)
-                        Image(systemName: "bitcoinsign.circle.fill")
-                            .foregroundStyle(.yellow)
+                    }
+
+                    Spacer()
+
+                    // Door on right
+                    Button {
+                        path.removeLast(path.count) // back to root (Home)
+                    } label: {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                            .foregroundStyle(.black)
                     }
                 }
+                .padding(.top, 12)
 
-                Spacer().frame(height: 10)
-
+                // Card
                 ZStack {
                     Image("TrendingTopicsBack")
                         .resizable()
@@ -45,26 +54,25 @@ struct TrendingTopicGameView: View {
                         .foregroundStyle(.black)
                         .padding(.horizontal, 40)
                 }
-                .padding(.top, 10)
 
-
+                // Button
                 Button {
                     vm.nextTopic()
                 } label: {
                     Text("التالي")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(Color("Background"))
-                        .frame(width: 160, height: 48)
+                        .frame(width: 240, height: 48)
                         .background(Color("DarkBlue"))
                         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
+                .padding(.top, 6)
 
-                Spacer().frame(height: 10)
             }
             .padding(.horizontal, 22)
+            .frame(maxHeight: .infinity, alignment: .top) // ✅ anchor to top
         }
         .environment(\.layoutDirection, .rightToLeft)
         .navigationBarBackButtonHidden(true)
     }
 }
-
