@@ -24,16 +24,23 @@ struct TrendingTopicStartView: View {
                     .frame(width: 270, height: 250)
                     .padding(.vertical, 60)
 
-                TextField("ادخل اسمك", text: $vm.name)
-                    .multilineTextAlignment(.center)
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 16)
-                    .frame(width: 240, height: 48)
-                    .background(Color.white.opacity(0.25))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color("DarkBlue"), lineWidth: 2)
-                    )
+                TextField(
+                    "",
+                    text: $vm.name,
+                    prompt: Text("ادخل اسمك")
+                        .foregroundColor(.gray)
+                )
+                .foregroundColor(.black)
+                .multilineTextAlignment(.center)
+                .padding(.vertical, 12)
+                .padding(.horizontal, 16)
+                .frame(width: 240, height: 48)
+                .background(Color.white.opacity(0.25))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color("DarkBlue"), lineWidth: 2)
+                )
+
 
                 Button {
                     let room = TTRoom(
@@ -57,7 +64,7 @@ struct TrendingTopicStartView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
                 .disabled(!vm.canStart)
-                .padding(.top, 20)
+                .padding(.top, 70)
 
                 Button {
                     path.append(AppRoute.trendingJoin(name: vm.name))
@@ -74,8 +81,6 @@ struct TrendingTopicStartView: View {
             }
             .environment(\.layoutDirection, .rightToLeft)
         }
-        // Start screen usually shouldn't have a back button.
-        // If you want it to go back to HomePage:
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {

@@ -16,25 +16,32 @@ struct TrendingTopicJoinView: View {
             Color("Background").ignoresSafeArea()
 
             VStack(spacing: 18) {
-                Spacer()
-
                 Image("TrendingTopicsPage")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 270, height: 250)
+                    .padding(.vertical, 60)
 
-                TextField("ادخل رقم الغرفة", text: $vm.roomCode)
-                    .keyboardType(.numberPad)
-                    .multilineTextAlignment(.center)
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 16)
-                    .frame(width: 240, height: 48)
-                    .background(Color.white.opacity(0.25))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color("DarkBlue"), lineWidth: 1.5)
-                    )
-
+                TextField(
+                    "",
+                    text: $vm.roomCode,
+                    prompt: Text("ادخل رقم الغرفة")
+                        .foregroundColor(.gray)
+                )
+                .keyboardType(.numberPad)
+                .foregroundColor(.black)        
+                .multilineTextAlignment(.center)
+                .padding(.vertical, 12)
+                .padding(.horizontal, 16)
+                .frame(width: 240, height: 48)
+                .background(Color.white.opacity(0.25))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color("DarkBlue"), lineWidth: 1.5)
+                )
+                
+              Spacer()
+                
                 Button {
                     let room = TTRoom(
                         code: vm.roomCode.isEmpty ? "55555" : vm.roomCode,
@@ -54,8 +61,9 @@ struct TrendingTopicJoinView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
                 .disabled(!vm.canJoin)
-
-                Spacer()
+                .padding(.top, -150)
+                
+              
             }
             .padding(.horizontal, 22)
         }

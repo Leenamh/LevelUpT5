@@ -11,17 +11,17 @@ import UIKit
 @MainActor
 final class TrendingTopicLobbyVM: ObservableObject {
     @Published var room: TTRoom
-    let isHost: Bool
+       let isHost: Bool
 
-    init(room: TTRoom, isHost: Bool) {
-        self.room = room
-        self.isHost = isHost
-    }
+       init(room: TTRoom, isHost: Bool) {
+           self.room = room
+           self.isHost = isHost
+       }
 
-    func copyCode() {
-        UIPasteboard.general.string = room.code
-    }
-
+       func copyCode() {
+           UIPasteboard.general.string = room.code
+       }
+    
     // Split players into 2 columns (RTL-friendly)
     var columns: ([TTPlayer], [TTPlayer]) {
         var right: [TTPlayer] = []

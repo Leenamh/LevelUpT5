@@ -10,38 +10,63 @@ import SwiftUI
 struct TrendingTopicLobbyView: View {
     @Binding var path: NavigationPath
     @StateObject var vm: TrendingTopicLobbyVM
+    @State private var showCopiedToast = false
+
 
     var body: some View {
         ZStack {
-            Color("TrendingTopicsBack").ignoresSafeArea()
+            Color("Background").ignoresSafeArea()
 
             VStack(spacing: 14) {
 
-                HStack {
-                    Text("بانتظار اللاعبين")
-                        .font(.system(size: 40, weight: .black))
-                        .foregroundStyle(.black.opacity(0.85))
-                    Spacer()
-                }
-                .padding(.top, 8)
+                Text("بانتظار اللاعبين")
+                    .font(.system(size: 40, weight: .black))
+                    .foregroundStyle(.black.opacity(0.85))
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, 8)
+
 
                 VStack(spacing: 8) {
                     Text("رقم الغرفة")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(.black.opacity(0.65))
-
+                    
                     HStack(spacing: 10) {
                         Text(vm.room.code)
                             .font(.system(size: 22, weight: .bold))
+                            .foregroundStyle(.black)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
-
-                        Button(action: vm.copyCode) {
-                            Image(systemName: "doc.on.doc")
-                                .foregroundStyle(.black.opacity(0.7))
+                        
+                        
+                        Button {
+                            vm.copyCode()
+                            
+                            // Haptic feedback
+                            let gen = UINotificationFeedbackGenerator()
+                            gen.notificationOccurred(.success)
+                            
+                            // Show "copied" UI
+                            withAnimation(.easeInOut) { showCopiedToast = true }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                                withAnimation(.easeInOut) { showCopiedToast = false }
+                            }
+                        } label: {
+                            Image(systemName: showCopiedToast ? "checkmark.circle.fill" : "doc.on.doc")
+                                .foregroundStyle(showCopiedToast ? .green : .black.opacity(0.7))
                         }
                     }
+                    
+                    
+                    if showCopiedToast {
+                        Text("تم نسخ رقم الغرفة ")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.green)
+                            .transition(.opacity)
+                    }
                 }
+
 
                 Spacer().frame(height: 30)
 

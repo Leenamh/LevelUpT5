@@ -20,7 +20,15 @@ struct TrendingTopicGameView: View {
 
                 // Top bar
                 HStack {
-                    // Coins on left (as in your screenshot)
+                    Button {
+                        path.removeLast(path.count)
+                    } label: {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                            .foregroundStyle(.black)
+                    }
+                    
+                    Spacer()
+                    
                     HStack(spacing: 6) {
                         Image(systemName: "bitcoinsign.circle.fill")
                             .foregroundStyle(.yellow)
@@ -29,17 +37,9 @@ struct TrendingTopicGameView: View {
                             .foregroundStyle(.yellow)
                     }
 
-                    Spacer()
-
-                    // Door on right
-                    Button {
-                        path.removeLast(path.count) // back to root (Home)
-                    } label: {
-                        Image(systemName: "rectangle.portrait.and.arrow.right")
-                            .foregroundStyle(.black)
-                    }
                 }
-                .padding(.top, 12)
+                .padding(.top, 4)
+                .padding(.bottom, 10)
 
                 // Card
                 ZStack {
@@ -52,8 +52,9 @@ struct TrendingTopicGameView: View {
                         .font(.system(size: 26, weight: .black))
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.black)
-                        .padding(.horizontal, 40)
+                        .padding(.horizontal, 70)
                 }
+                .padding(.top, 50)
 
                 // Button
                 Button {
@@ -66,11 +67,11 @@ struct TrendingTopicGameView: View {
                         .background(Color("DarkBlue"))
                         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
-                .padding(.top, 6)
+                .padding(.top, 80)
 
             }
             .padding(.horizontal, 22)
-            .frame(maxHeight: .infinity, alignment: .top) // ✅ anchor to top
+            .frame(maxHeight: .infinity, alignment: .top)
         }
         .environment(\.layoutDirection, .rightToLeft)
         .navigationBarBackButtonHidden(true)

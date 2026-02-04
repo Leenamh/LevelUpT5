@@ -8,7 +8,6 @@
 import SwiftUI
 
 
-
 struct ContentView: View {
     @State private var path = NavigationPath()
 
