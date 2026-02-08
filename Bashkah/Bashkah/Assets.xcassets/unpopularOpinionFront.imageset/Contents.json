@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "TrendingTopicsBack.png",
+      "filename" : "unpopularOpinionFront.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "TrendingTopicsBack@2x.png",
+      "filename" : "unpopularOpinionFront@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "TrendingTopicsBack@3x.png",
+      "filename" : "unpopularOpinionFront@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
