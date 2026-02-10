@@ -1,20 +1,29 @@
 import SwiftUI
 
-// MARK: - Start Page View
-
 struct StartPageView: View {
     @StateObject private var vm = StartPageViewModel()
+
+    // 🔴 NEW
+    @State private var isFrontCardFlipped = false
+    @State private var currentFrontCard: CardType?
 
     var body: some View {
         ZStack {
             Color("BG").ignoresSafeArea()
 
+            // CARDS
             ZStack {
                 ForEach(Array(vm.cards.enumerated()), id: \.element) { index, card in
                     StartPageCardView(
                         frontImage: card.front,
                         backImage: card.back,
                         isFront: index == 0,
+                        onFlipChanged: { flipped in
+                            if index == 0 {
+                                isFrontCardFlipped = flipped
+                                currentFrontCard = flipped ? card : nil
+                            }
+                        },
                         onTap: {
                             vm.bringToFront(card)
                         },
@@ -40,6 +49,7 @@ struct StartPageView: View {
                 }
             }
 
+            // TITLE
             VStack {
                 Text("اختر لعبتك")
                     .font(.system(size: 44, weight: .bold))
@@ -47,12 +57,45 @@ struct StartPageView: View {
                     .padding(.top, 90)
                 Spacer()
             }
+
+            // 🔴 ACTION BUTTON
+            if isFrontCardFlipped, let card = currentFrontCard {
+                VStack {
+                    Spacer()
+                    Button(action: {
+                        print("Play \(card)")
+                    }) {
+                        Text("اللعب")
+                            .font(.system(size: 25, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 208, height: 48)   // ✅ added
+                            .background(buttonColor(for: card))
+                            .cornerRadius(15)
+                            .padding(.horizontal, 110)
+                            .padding(.bottom, 60)
+                    }
+                }
+                .transition(.opacity)
+            }
+
         }
-        .navigationBarBackButtonHidden(true)   // 🚫 hide back arrow
-        .disableSwipeBack()                    // 🚫 disable swipe back
+        .animation(.easeInOut(duration: 0.25), value: isFrontCardFlipped)
+        .navigationBarBackButtonHidden(true)
+        .disableSwipeBack()
     }
 
-    // MARK: - Layout helpers
+    // MARK: - Helpers
+
+    private func buttonColor(for card: CardType) -> Color {
+        switch card {
+        case .fact:
+            return Color("Orange")
+        case .trending:
+            return Color("DarkBlue")
+        case .unpopular:
+            return Color("Green2")
+        }
+    }
 
     private func xOffset(for index: Int) -> CGFloat {
         switch index {
@@ -82,34 +125,5 @@ struct StartPageView: View {
 #Preview {
     NavigationStack {
         StartPageView()
-    }
-}
-
-//////////////////////////////////////////////////////////////
-// MARK: - Disable Swipe Back (INLINE)
-//////////////////////////////////////////////////////////////
-
-private struct DisableSwipeBack: ViewModifier {
-    func body(content: Content) -> some View {
-        content.background(DisableSwipeBackController())
-    }
-}
-
-private struct DisableSwipeBackController: UIViewControllerRepresentable {
-
-    func makeUIViewController(context: Context) -> UIViewController {
-        let controller = UIViewController()
-        DispatchQueue.main.async {
-            controller.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
-        }
-        return controller
-    }
-
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
-}
-
-private extension View {
-    func disableSwipeBack() -> some View {
-        modifier(DisableSwipeBack())
     }
 }

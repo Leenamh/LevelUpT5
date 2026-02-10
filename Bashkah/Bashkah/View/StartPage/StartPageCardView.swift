@@ -5,11 +5,11 @@ enum SwipeDirection {
     case right
 }
 
-
 struct StartPageCardView: View {
     let frontImage: String
     let backImage: String
     let isFront: Bool
+    let onFlipChanged: (Bool) -> Void   // 🔴 NEW
     let onTap: () -> Void
     let onSwipe: (SwipeDirection) -> Void
 
@@ -71,6 +71,7 @@ struct StartPageCardView: View {
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             flipped.toggle()
+            onFlipChanged(flipped)   // 🔴 notify parent
             withAnimation(.easeOut(duration: 0.25)) {
                 rotation += 90
             }
@@ -80,5 +81,6 @@ struct StartPageCardView: View {
     private func resetToFront() {
         flipped = false
         rotation = 0
+        onFlipChanged(false)        // 🔴 notify parent
     }
 }
