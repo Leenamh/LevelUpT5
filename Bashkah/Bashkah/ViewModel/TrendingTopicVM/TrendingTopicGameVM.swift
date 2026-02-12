@@ -10,21 +10,27 @@ import Foundation
 @MainActor
 final class TrendingTopicGameVM: ObservableObject {
     @Published var coins: Int = 10
-    @Published var topic: String = "TRENDING TOPIC"
+    @Published var topic: String
 
     private let mockTopics = [
-        "أسعار القهوة المختصة",
-        "الدوري السعودي",
-        "موسم الرياض",
-        "مطاعم جديدة بالرياض",
-        "الذكاء الاصطناعي في الدراسة",
-        "السيارات الكهربائية"
+        "دوام رمضان",
+        "العيد",
+        "صلاة التراويح",
+        "يوم التأسيس السعودي",
+        "صلاة الاستسقاء",
+        "2026 Winter Olympics – Ice Hockey",
+        "فعاليات بوليفارد وورلد",
+        "كأس العالم للأندية",
+        "حفلات موسم الرياض"
     ]
-    private var idx = 0
+
+    init() {
+        topic = mockTopics.randomElement() ?? ""
+    }
 
     func nextTopic() {
-        idx = (idx + 1) % mockTopics.count
-        topic = mockTopics[idx]
+        topic = mockTopics.randomElement() ?? topic
     }
 }
+
 

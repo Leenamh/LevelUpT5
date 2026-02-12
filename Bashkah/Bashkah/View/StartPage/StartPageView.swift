@@ -3,15 +3,13 @@ import SwiftUI
 struct StartPageView: View {
     @StateObject private var vm = StartPageViewModel()
 
-    // 🔴 NEW
     @State private var isFrontCardFlipped = false
     @State private var currentFrontCard: CardType?
 
     var body: some View {
         ZStack {
-            Color("BG").ignoresSafeArea()
 
-            // CARDS
+            // MARK: - CARDS
             ZStack {
                 ForEach(Array(vm.cards.enumerated()), id: \.element) { index, card in
                     StartPageCardView(
@@ -49,16 +47,16 @@ struct StartPageView: View {
                 }
             }
 
-            // TITLE
+            // MARK: - TITLE
             VStack {
                 Text("اختر لعبتك")
                     .font(.system(size: 44, weight: .bold))
                     .foregroundStyle(Color("FontColorBlack"))
-                    .padding(.top, 90)
+                    .padding(.top, 80)
                 Spacer()
             }
 
-            // 🔴 ACTION BUTTON
+            // MARK: - BUTTON
             if isFrontCardFlipped, let card = currentFrontCard {
                 VStack {
                     Spacer()
@@ -68,23 +66,57 @@ struct StartPageView: View {
                         Text("اللعب")
                             .font(.system(size: 25, weight: .bold))
                             .foregroundColor(.white)
-                            .frame(width: 208, height: 48)   // ✅ added
+                            .frame(width: 208, height: 48)
                             .background(buttonColor(for: card))
                             .cornerRadius(15)
                             .padding(.horizontal, 110)
                             .padding(.bottom, 60)
                     }
+                    
                 }
-                .transition(.opacity)
             }
 
-        }
-        .animation(.easeInOut(duration: 0.25), value: isFrontCardFlipped)
+
+        }           
+
+        // MARK: - FIXED BACKGROUND USING GEOMETRY
+        .background(
+            GeometryReader { geo in
+                Group {
+                    if isFrontCardFlipped, let card = currentFrontCard {
+                        Image(backgroundImage(for: card))
+                            .resizable()
+                            .frame(width: geo.size.width,
+                                   height: geo.size.height)
+                            .ignoresSafeArea()
+                            .background(Color("BG"))
+                    } else {
+//                        Color("BG")
+//                            .ignoresSafeArea()
+                    }
+                    
+                }
+            }
+        )
         .navigationBarBackButtonHidden(true)
         .disableSwipeBack()
     }
+    
 
-    // MARK: - Helpers
+    // MARK: - Background Mapping
+
+    private func backgroundImage(for card: CardType) -> String {
+        switch card {
+        case .fact:
+            return "FactBG"
+        case .trending:
+            return "TrendingTopicsBG"
+        case .unpopular:
+            return "unpopularOpinionBG"
+        }
+    }
+
+    // MARK: - Button Color
 
     private func buttonColor(for card: CardType) -> Color {
         switch card {
@@ -96,6 +128,8 @@ struct StartPageView: View {
             return Color("Green2")
         }
     }
+
+    // MARK: - Card Position Helpers
 
     private func xOffset(for index: Int) -> CGFloat {
         switch index {
