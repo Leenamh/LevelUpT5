@@ -71,7 +71,7 @@ struct StartPageCardView: View {
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             flipped.toggle()
-            onFlipChanged(flipped)   // 🔴 notify parent
+            onFlipChanged(flipped)
             withAnimation(.easeOut(duration: 0.25)) {
                 rotation += 90
             }
@@ -81,6 +81,6 @@ struct StartPageCardView: View {
     private func resetToFront() {
         flipped = false
         rotation = 0
-        onFlipChanged(false)        // 🔴 notify parent
+        onFlipChanged(false)
     }
 }

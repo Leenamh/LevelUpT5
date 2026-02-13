@@ -1,14 +1,10 @@
-//
-//  TrendingTopicStartView.swift
-//  Bashkah
-//
-//  Created by Najd Alsabi on 16/08/1447 AH.
-//
-
 import SwiftUI
 
 struct TrendingTopicStartView: View {
+    
     @AppStorage("playerName") private var playerName: String = ""
+    @Environment(\.dismiss) private var dismiss   // ✅ Back
+    
     @State private var logoScale: CGFloat = 0.8
     @State private var logoRotation: Double = -5
     @State private var buttonScale1: CGFloat = 1.0
@@ -16,27 +12,32 @@ struct TrendingTopicStartView: View {
 
     var body: some View {
         ZStack {
-            // Background with gradient
+            
+            // MARK: Background
             LinearGradient(
-                colors: [Color("Background"), Color("Background").opacity(0.95)],
+                colors: [
+                    Color("Background"),
+                    Color("Background").opacity(0.95)
+                ],
                 startPoint: .top,
                 endPoint: .bottom
             )
             .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Back Button
+                
+                // MARK: Back Button
                 backButton
                 
                 Spacer()
                 
-                // Logo with animation
+                // MARK: Logo
                 logoView
                 
                 Spacer()
                     .frame(height: 80)
                 
-                // Buttons
+                // MARK: Buttons
                 actionButtons
                 
                 Spacer()
@@ -52,15 +53,22 @@ struct TrendingTopicStartView: View {
         }
     }
     
-    // MARK: - Back Button with gradient
+    
+    // MARK: - Back Button (FIXED)
+    
     private var backButton: some View {
         HStack {
             Spacer()
             
-            NavigationLink(value: AppRoute.trendingStart) {
+            Button {
+                dismiss()   // ✅ Pop back
+            } label: {
                 ZStack {
                     LinearGradient(
-                        colors: [Color("DarkBlue").opacity(0.3), Color("DarkBlue").opacity(0.1)],
+                        colors: [
+                            Color("DarkBlue").opacity(0.3),
+                            Color("DarkBlue").opacity(0.1)
+                        ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -77,7 +85,9 @@ struct TrendingTopicStartView: View {
         .padding(.top, 50)
     }
     
-    // MARK: - Logo View with animation
+    
+    // MARK: - Logo
+    
     private var logoView: some View {
         Image("TrendingTopicsPage")
             .resizable()
@@ -85,13 +95,19 @@ struct TrendingTopicStartView: View {
             .frame(width: 269, height: 269)
             .scaleEffect(logoScale)
             .rotationEffect(.degrees(logoRotation))
-            .shadow(color: Color("DarkBlue").opacity(0.3), radius: 20, x: 0, y: 10)
+            .shadow(color: Color("DarkBlue").opacity(0.3),
+                    radius: 20,
+                    x: 0,
+                    y: 10)
     }
     
-    // MARK: - Action Buttons with gradient and animation
+    
+    // MARK: - Buttons
+    
     private var actionButtons: some View {
         VStack(spacing: 18) {
-            // Create New Game Button
+            
+            // Create Game
             NavigationLink(value: AppRoute.trendingLobby(
                 room: TTRoom(
                     code: String(format: "%05d", Int.random(in: 10000...99999)),
@@ -99,94 +115,104 @@ struct TrendingTopicStartView: View {
                 ),
                 isHost: true
             )) {
-                ZStack {
-                    LinearGradient(
-                        colors: [
-                            Color("DarkBlue"),
-                            Color("DarkBlue").opacity(0.8)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    .frame(width: 320, height: 58)
-                    .cornerRadius(29)
-                    .shadow(color: Color("DarkBlue").opacity(0.5), radius: 15, x: 0, y: 8)
-                    
-                    Text("ابدأ لعبة جديدة")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.white)
-                }
+                gradientButton(title: "ابدأ لعبة جديدة")
             }
             .simultaneousGesture(TapGesture().onEnded {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                    buttonScale1 = 0.95
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                        buttonScale1 = 1.0
-                    }
-                }
+                animateButton($buttonScale1)
             })
             .scaleEffect(buttonScale1)
             
-            // Join Game Button
+            
+            // Join Game
             NavigationLink(value: AppRoute.trendingJoin) {
-                ZStack {
-                    LinearGradient(
-                        colors: [
-                            Color("DarkBlue"),
-                            Color("DarkBlue").opacity(0.8)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    .frame(width: 320, height: 58)
-                    .cornerRadius(29)
-                    .shadow(color: Color("DarkBlue").opacity(0.5), radius: 15, x: 0, y: 8)
-                    
-                    Text("دخول لعبة")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.white)
-                }
+                gradientButton(title: "دخول لعبة")
             }
             .simultaneousGesture(TapGesture().onEnded {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                    buttonScale2 = 0.95
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                        buttonScale2 = 1.0
-                    }
-                }
+                animateButton($buttonScale2)
             })
             .scaleEffect(buttonScale2)
         }
     }
     
+    
+    // MARK: - Gradient Button
+    
+    private func gradientButton(title: String) -> some View {
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Color("DarkBlue"),
+                    Color("DarkBlue").opacity(0.8)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .frame(width: 320, height: 58)
+            .cornerRadius(29)
+            .shadow(
+                color: Color("DarkBlue").opacity(0.5),
+                radius: 15,
+                x: 0,
+                y: 8
+            )
+            
+            Text(title)
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(.white)
+        }
+    }
+    
+    
+    // MARK: - Button Animation (SAFE)
+    
+    private func animateButton(_ scale: Binding<CGFloat>) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+            scale.wrappedValue = 0.95
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                scale.wrappedValue = 1.0
+            }
+        }
+    }
+    
+    
     // MARK: - Route Destination
+    
     @ViewBuilder
     private func routeDestination(for route: AppRoute) -> some View {
         switch route {
+            
         case .trendingJoin:
-            TrendingTopicJoinView(vm: TrendingTopicJoinVM(displayName: playerName))
+            TrendingTopicJoinView(
+                vm: TrendingTopicJoinVM(displayName: playerName)
+            )
+            
         case .trendingLobby(let room, let isHost):
-            TrendingTopicLobbyView(vm: TrendingTopicLobbyVM(room: room, isHost: isHost))
+            TrendingTopicLobbyView(
+                vm: TrendingTopicLobbyVM(room: room, isHost: isHost)
+            )
+            
         case .trendingGame:
-            TrendingTopicGameView(vm: TrendingTopicGameVM())
+            TrendingTopicGameView(
+                vm: TrendingTopicGameVM()
+            )
+            
         default:
             EmptyView()
         }
     }
     
-    // MARK: - Start Animations
+    
+    // MARK: - Logo Animations
+    
     private func startAnimations() {
-        // Logo entrance animation
         withAnimation(.spring(response: 0.8, dampingFraction: 0.6)) {
             logoScale = 1.0
             logoRotation = 0
         }
         
-        // Continuous subtle floating animation
         withAnimation(
             Animation.easeInOut(duration: 3.0)
                 .repeatForever(autoreverses: true)
@@ -202,6 +228,7 @@ struct TrendingTopicStartView: View {
         }
     }
 }
+
 
 #Preview {
     NavigationStack {

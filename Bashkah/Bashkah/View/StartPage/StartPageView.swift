@@ -1,14 +1,16 @@
 import SwiftUI
 
 struct StartPageView: View {
+    
     @StateObject private var vm = StartPageViewModel()
-
+    
     @State private var isFrontCardFlipped = false
     @State private var currentFrontCard: CardType?
-
+    @State private var navigateTo: CardType?   // ✅ Navigation trigger
+    
     var body: some View {
         ZStack {
-
+            
             // MARK: - CARDS
             ZStack {
                 ForEach(Array(vm.cards.enumerated()), id: \.element) { index, card in
@@ -46,7 +48,7 @@ struct StartPageView: View {
                     .zIndex(zIndex(for: index))
                 }
             }
-
+            
             // MARK: - TITLE
             VStack {
                 Text("اختر لعبتك")
@@ -55,13 +57,14 @@ struct StartPageView: View {
                     .padding(.top, 80)
                 Spacer()
             }
-
-            // MARK: - BUTTON
+            
+            // MARK: - PLAY BUTTON
             if isFrontCardFlipped, let card = currentFrontCard {
                 VStack {
                     Spacer()
+                    
                     Button(action: {
-                        print("Play \(card)")
+                        navigateTo = card   // ✅ Navigate
                     }) {
                         Text("اللعب")
                             .font(.system(size: 25, weight: .bold))
@@ -72,14 +75,11 @@ struct StartPageView: View {
                             .padding(.horizontal, 110)
                             .padding(.bottom, 60)
                     }
-                    
                 }
             }
-
-
-        }           
-
-        // MARK: - FIXED BACKGROUND USING GEOMETRY
+        }
+        
+        // MARK: - BACKGROUND
         .background(
             GeometryReader { geo in
                 Group {
@@ -89,22 +89,32 @@ struct StartPageView: View {
                             .frame(width: geo.size.width,
                                    height: geo.size.height)
                             .ignoresSafeArea()
-//                            .background(Color("BG"))
                     } else {
-//                        Color("BG")
-//                            .ignoresSafeArea()
+                        Color("BG")
+                            .ignoresSafeArea()
                     }
-                    
                 }
             }
         )
+        
+        // MARK: - NAVIGATION
         .navigationBarBackButtonHidden(true)
         .disableSwipeBack()
+        .navigationDestination(item: $navigateTo) { card in
+            switch card {
+            case .fact:
+                FunFactStartPage()
+            case .unpopular:
+                UnpopularOpinionStartView()
+            case .trending:
+                TrendingTopicStartView()
+            }
+        }
     }
     
-
+    
     // MARK: - Background Mapping
-
+    
     private func backgroundImage(for card: CardType) -> String {
         switch card {
         case .fact:
@@ -115,9 +125,9 @@ struct StartPageView: View {
             return "unpopularOpinionBG"
         }
     }
-
+    
     // MARK: - Button Color
-
+    
     private func buttonColor(for card: CardType) -> Color {
         switch card {
         case .fact:
@@ -128,9 +138,9 @@ struct StartPageView: View {
             return Color("Green2")
         }
     }
-
+    
     // MARK: - Card Position Helpers
-
+    
     private func xOffset(for index: Int) -> CGFloat {
         switch index {
         case 1: return 60
@@ -138,11 +148,11 @@ struct StartPageView: View {
         default: return 0
         }
     }
-
+    
     private func yOffset(for index: Int) -> CGFloat {
         index == 0 ? 20 : 32
     }
-
+    
     private func rotation(for index: Int) -> Double {
         switch index {
         case 1: return 7
@@ -150,7 +160,7 @@ struct StartPageView: View {
         default: return 0
         }
     }
-
+    
     private func zIndex(for index: Int) -> Double {
         Double(3 - index)
     }
