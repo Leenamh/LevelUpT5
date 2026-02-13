@@ -1,20 +1,26 @@
 //
-//  TrendingTopicJoinView.swift
+//  UnpopularOpinionJoinView.swift
 //  Bashkah
 //
 //  Created by Hneen on 24/08/1447 AH.
 //
 //
-//  TrendingTopicJoinView.swift
+//  Unpopularopinionjoinview .swift
 //  Bashkah
 //
-//  Created by Najd Alsabi on 16/08/1447 AH.
+//  Created by Hneen on 24/08/1447 AH.
+//
+//
+//  UnpopularOpinionJoinView.swift
+//  Bashkah
+//
+//  Created on 24/08/1447 AH.
 //
 
 import SwiftUI
 
-struct TrendingTopicJoinView: View {
-    @StateObject var vm: TrendingTopicJoinVM
+struct UnpopularOpinionJoinView: View {
+    @StateObject var vm: UnpopularOpinionJoinVM
     @Environment(\.dismiss) private var dismiss
     @State private var logoScale: CGFloat = 0.8
     @State private var logoRotation: Double = -5
@@ -67,17 +73,16 @@ struct TrendingTopicJoinView: View {
                 dismiss()
             }) {
                 ZStack {
-                    // Gradient background
                     LinearGradient(
-                        colors: [Color("DarkBlue").opacity(0.3), Color("DarkBlue").opacity(0.1)],
+                        colors: [Color(hex: "56805D").opacity(0.3), Color(hex: "56805D").opacity(0.1)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                     .frame(width: 40, height: 40)
                     .cornerRadius(20)
                     
-                    Image(systemName: "chevron.forward")
-                        .foregroundColor(Color("DarkBlue"))
+                    Image(systemName: "chevron.backward")
+                        .foregroundColor(Color(hex: "56805D"))
                         .font(.system(size: 18, weight: .bold))
                 }
             }
@@ -88,13 +93,13 @@ struct TrendingTopicJoinView: View {
     
     // MARK: - Logo View
     private var logoView: some View {
-        Image("TrendingTopicsPage")
+        Image("unpopularOpinionPage")
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(width: 269, height: 269)
             .scaleEffect(logoScale)
             .rotationEffect(.degrees(logoRotation))
-            .shadow(color: Color("DarkBlue").opacity(0.3), radius: 20, x: 0, y: 10)
+            .shadow(color: Color(hex: "56805D").opacity(0.3), radius: 20, x: 0, y: 10)
     }
     
     // MARK: - Room Number Field
@@ -111,16 +116,15 @@ struct TrendingTopicJoinView: View {
                 RoundedRectangle(cornerRadius: 27.5)
                     .stroke(
                         LinearGradient(
-                            colors: [Color("DarkBlue"), Color("DarkBlue").opacity(0.6)],
+                            colors: [Color(hex: "56805D"), Color(hex: "56805D").opacity(0.6)],
                             startPoint: .leading,
                             endPoint: .trailing
                         ),
                         lineWidth: 2.5
                     )
             )
-            .shadow(color: Color("DarkBlue").opacity(0.2), radius: 10, x: 0, y: 5)
+            .shadow(color: Color(hex: "56805D").opacity(0.2), radius: 10, x: 0, y: 5)
             .onChange(of: vm.roomCode) { newValue in
-                // Limit to 5 digits
                 if newValue.count > 5 {
                     vm.roomCode = String(newValue.prefix(5))
                 }
@@ -129,23 +133,15 @@ struct TrendingTopicJoinView: View {
     
     // MARK: - Join Button
     private var joinButton: some View {
-        NavigationLink(value: AppRoute.trendingLobby(
-            room: TTRoom(
-                code: vm.roomCode.isEmpty ? "55555" : vm.roomCode,
-                players: [
-                    TTPlayer(name: "حصة"),
-                    TTPlayer(name: vm.displayName.isEmpty ? "لاعب" : vm.displayName),
-                    TTPlayer(name: "لينا")
-                ]
-            ),
+        NavigationLink(value: AppRoute.unpopularWriting(
+            roomCode: vm.roomCode.isEmpty ? "55555" : vm.roomCode,
             isHost: false
         )) {
             ZStack {
-                // Gradient background
                 LinearGradient(
                     colors: [
-                        vm.canJoin ? Color("DarkBlue") : Color("DarkBlue").opacity(0.4),
-                        vm.canJoin ? Color("DarkBlue").opacity(0.8) : Color("DarkBlue").opacity(0.2)
+                        vm.canJoin ? Color(hex: "56805D") : Color(hex: "56805D").opacity(0.4),
+                        vm.canJoin ? Color(hex: "56805D").opacity(0.8) : Color(hex: "56805D").opacity(0.2)
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -153,7 +149,7 @@ struct TrendingTopicJoinView: View {
                 .frame(width: 320, height: 58)
                 .cornerRadius(29)
                 .shadow(
-                    color: (vm.canJoin ? Color("DarkBlue") : Color.gray).opacity(0.5),
+                    color: (vm.canJoin ? Color(hex: "56805D") : Color.gray).opacity(0.5),
                     radius: 15,
                     x: 0,
                     y: 8
@@ -206,8 +202,8 @@ struct TrendingTopicJoinView: View {
 
 #Preview {
     NavigationStack {
-        TrendingTopicJoinView(
-            vm: TrendingTopicJoinVM(displayName: "حنين")
+        UnpopularOpinionJoinView(
+            vm: UnpopularOpinionJoinVM(displayName: "حنين")
         )
     }
 }

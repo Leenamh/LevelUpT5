@@ -1,13 +1,19 @@
 //
-//  TrendingTopicStartView.swift
+//  UnpopularOpinionStartView.swift
 //  Bashkah
 //
-//  Created by Najd Alsabi on 16/08/1447 AH.
+//  Created by Hneen on 24/08/1447 AH.
+//
+//
+//  UnpopularOpinionStartView.swift
+//  Bashkah
+//
+//  Created on 24/08/1447 AH.
 //
 
 import SwiftUI
 
-struct TrendingTopicStartView: View {
+struct UnpopularOpinionStartView: View {
     @AppStorage("playerName") private var playerName: String = ""
     @State private var logoScale: CGFloat = 0.8
     @State private var logoRotation: Double = -5
@@ -34,7 +40,7 @@ struct TrendingTopicStartView: View {
                 logoView
                 
                 Spacer()
-                    .frame(height: 80)
+                    .frame(height: 150)
                 
                 // Buttons
                 actionButtons
@@ -52,15 +58,15 @@ struct TrendingTopicStartView: View {
         }
     }
     
-    // MARK: - Back Button with gradient
+    // MARK: - Back Button
     private var backButton: some View {
         HStack {
             Spacer()
             
-            NavigationLink(value: AppRoute.trendingStart) {
+            NavigationLink(value: AppRoute.unpopularStart) {
                 ZStack {
                     LinearGradient(
-                        colors: [Color("DarkBlue").opacity(0.3), Color("DarkBlue").opacity(0.1)],
+                        colors: [Color(hex: "56805D").opacity(0.3), Color(hex: "56805D").opacity(0.1)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -68,7 +74,7 @@ struct TrendingTopicStartView: View {
                     .cornerRadius(20)
                     
                     Image(systemName: "chevron.forward")
-                        .foregroundColor(Color("DarkBlue"))
+                        .foregroundColor(Color(hex: "56805D"))
                         .font(.system(size: 18, weight: .bold))
                 }
             }
@@ -77,40 +83,37 @@ struct TrendingTopicStartView: View {
         .padding(.top, 50)
     }
     
-    // MARK: - Logo View with animation
+    // MARK: - Logo View
     private var logoView: some View {
-        Image("TrendingTopicsPage")
+        Image("unpopularOpinionPage")
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(width: 269, height: 269)
             .scaleEffect(logoScale)
             .rotationEffect(.degrees(logoRotation))
-            .shadow(color: Color("DarkBlue").opacity(0.3), radius: 20, x: 0, y: 10)
+            .shadow(color: Color(hex: "56805D").opacity(0.3), radius: 20, x: 0, y: 10)
     }
     
-    // MARK: - Action Buttons with gradient and animation
+    // MARK: - Action Buttons
     private var actionButtons: some View {
         VStack(spacing: 18) {
             // Create New Game Button
-            NavigationLink(value: AppRoute.trendingLobby(
-                room: TTRoom(
-                    code: String(format: "%05d", Int.random(in: 10000...99999)),
-                    players: [TTPlayer(name: playerName)]
-                ),
+            NavigationLink(value: AppRoute.unpopularWriting(
+                roomCode: String(format: "%05d", Int.random(in: 10000...99999)),
                 isHost: true
             )) {
                 ZStack {
                     LinearGradient(
                         colors: [
-                            Color("DarkBlue"),
-                            Color("DarkBlue").opacity(0.8)
+                            Color(hex: "56805D"),
+                            Color(hex: "56805D").opacity(0.8)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                     .frame(width: 320, height: 58)
                     .cornerRadius(29)
-                    .shadow(color: Color("DarkBlue").opacity(0.5), radius: 15, x: 0, y: 8)
+                    .shadow(color: Color(hex: "56805D").opacity(0.5), radius: 15, x: 0, y: 8)
                     
                     Text("ابدأ لعبة جديدة")
                         .font(.system(size: 18, weight: .bold))
@@ -130,19 +133,19 @@ struct TrendingTopicStartView: View {
             .scaleEffect(buttonScale1)
             
             // Join Game Button
-            NavigationLink(value: AppRoute.trendingJoin) {
+            NavigationLink(value: AppRoute.unpopularJoin) {
                 ZStack {
                     LinearGradient(
                         colors: [
-                            Color("DarkBlue"),
-                            Color("DarkBlue").opacity(0.8)
+                            Color(hex: "56805D"),
+                            Color(hex: "56805D").opacity(0.8)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                     .frame(width: 320, height: 58)
                     .cornerRadius(29)
-                    .shadow(color: Color("DarkBlue").opacity(0.5), radius: 15, x: 0, y: 8)
+                    .shadow(color: Color(hex: "56805D").opacity(0.5), radius: 15, x: 0, y: 8)
                     
                     Text("دخول لعبة")
                         .font(.system(size: 18, weight: .bold))
@@ -167,12 +170,18 @@ struct TrendingTopicStartView: View {
     @ViewBuilder
     private func routeDestination(for route: AppRoute) -> some View {
         switch route {
-        case .trendingJoin:
-            TrendingTopicJoinView(vm: TrendingTopicJoinVM(displayName: playerName))
-        case .trendingLobby(let room, let isHost):
-            TrendingTopicLobbyView(vm: TrendingTopicLobbyVM(room: room, isHost: isHost))
-        case .trendingGame:
-            TrendingTopicGameView(vm: TrendingTopicGameVM())
+        case .unpopularJoin:
+            UnpopularOpinionJoinView(vm: UnpopularOpinionJoinVM(displayName: playerName))
+        case .unpopularWriting(let roomCode, let isHost):
+            UnpopularOpinionWritingView(
+                vm: UnpopularOpinionWritingVM(roomCode: roomCode, playerName: playerName, isHost: isHost)
+            )
+        case .unpopularLobby(let room, let isHost):
+            UnpopularOpinionLobbyView(vm: UnpopularOpinionLobbyVM(room: room, isHost: isHost))
+        case .unpopularVoting(let room, let playerID):
+            UnpopularOpinionVotingView(vm: UnpopularOpinionVotingVM(room: room, currentPlayerID: playerID))
+        case .unpopularResults(let room):
+            UnpopularOpinionResultsView(vm: UnpopularOpinionResultsVM(room: room))
         default:
             EmptyView()
         }
@@ -180,13 +189,11 @@ struct TrendingTopicStartView: View {
     
     // MARK: - Start Animations
     private func startAnimations() {
-        // Logo entrance animation
         withAnimation(.spring(response: 0.8, dampingFraction: 0.6)) {
             logoScale = 1.0
             logoRotation = 0
         }
         
-        // Continuous subtle floating animation
         withAnimation(
             Animation.easeInOut(duration: 3.0)
                 .repeatForever(autoreverses: true)
@@ -205,6 +212,6 @@ struct TrendingTopicStartView: View {
 
 #Preview {
     NavigationStack {
-        TrendingTopicStartView()
+        UnpopularOpinionStartView()
     }
 }

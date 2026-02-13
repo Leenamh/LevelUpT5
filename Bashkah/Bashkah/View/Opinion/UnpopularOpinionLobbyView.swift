@@ -1,20 +1,26 @@
 //
-//  TrendingTopicLobbyView.swift
+//  UnpopularOpinionLobbyView.swift
 //  Bashkah
 //
 //  Created by Hneen on 24/08/1447 AH.
 //
 //
-//  TrendingTopicLobbyView.swift
+//  Unpopularopinionlobbyview.swift
 //  Bashkah
 //
-//  Created by Najd Alsabi on 16/08/1447 AH.
+//  Created by Hneen on 24/08/1447 AH.
+//
+//
+//  UnpopularOpinionLobbyView.swift
+//  Bashkah
+//
+//  Created on 24/08/1447 AH.
 //
 
 import SwiftUI
 
-struct TrendingTopicLobbyView: View {
-    @StateObject var vm: TrendingTopicLobbyVM
+struct UnpopularOpinionLobbyView: View {
+    @StateObject var vm: UnpopularOpinionLobbyVM
     @Environment(\.dismiss) private var dismiss
     @State private var cardsAppeared = false
     @State private var pulseAnimation = false
@@ -25,7 +31,7 @@ struct TrendingTopicLobbyView: View {
             LinearGradient(
                 colors: [
                     Color("Background"),
-                    Color("DarkBlue").opacity(0.05)
+                    Color(hex: "56805D").opacity(0.05)
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -75,7 +81,7 @@ struct TrendingTopicLobbyView: View {
                     Circle()
                         .fill(
                             LinearGradient(
-                                colors: [Color("DarkBlue").opacity(0.25), Color("DarkBlue").opacity(0.1)],
+                                colors: [Color(hex: "56805D").opacity(0.25), Color(hex: "56805D").opacity(0.1)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
@@ -83,7 +89,7 @@ struct TrendingTopicLobbyView: View {
                         .frame(width: 44, height: 44)
                     
                     Image(systemName: "chevron.backward")
-                        .foregroundColor(Color("DarkBlue"))
+                        .foregroundColor(Color(hex: "56805D"))
                         .font(.system(size: 20, weight: .bold))
                 }
             }
@@ -109,17 +115,17 @@ struct TrendingTopicLobbyView: View {
         HStack(spacing: 10) {
             Image(systemName: "person.2.fill")
                 .font(.system(size: 18))
-                .foregroundColor(Color("DarkBlue"))
+                .foregroundColor(Color(hex: "56805D"))
             
             Text("\(vm.room.players.count)/6 لاعبين")
                 .font(.system(size: 17, weight: .bold))
-                .foregroundColor(Color("DarkBlue"))
+                .foregroundColor(Color(hex: "56805D"))
         }
         .padding(.horizontal, 22)
         .padding(.vertical, 11)
         .background(
             Capsule()
-                .fill(Color("DarkBlue").opacity(0.15))
+                .fill(Color(hex: "56805D").opacity(0.15))
         )
         .scaleEffect(pulseAnimation ? 1.08 : 1.0)
         .padding(.top, 20)
@@ -132,7 +138,7 @@ struct TrendingTopicLobbyView: View {
         return ZStack {
             // Players positioned in circle
             ForEach(Array(players.enumerated()), id: \.element.id) { index, player in
-                TTPlayerCardCircular(player: player, appeared: cardsAppeared, rotation: rotationForIndex(index))
+                UOPlayerCardCircular(player: player, appeared: cardsAppeared, rotation: rotationForIndex(index))
                     .offset(
                         x: cos(angleForIndex(index, total: players.count)) * 120,
                         y: sin(angleForIndex(index, total: players.count)) * 120
@@ -144,12 +150,12 @@ struct TrendingTopicLobbyView: View {
     
     // MARK: - Start Button
     private var startButton: some View {
-        NavigationLink(value: AppRoute.trendingGame) {
+        NavigationLink(value: AppRoute.unpopularVoting(room: vm.room, currentPlayerID: vm.room.players.first?.id ?? UUID())) {
             ZStack {
                 LinearGradient(
                     colors: vm.isHost ? [
-                        Color("DarkBlue"),
-                        Color("DarkBlue").opacity(0.8)
+                        Color(hex: "56805D"),
+                        Color(hex: "56805D").opacity(0.8)
                     ] : [
                         Color.gray.opacity(0.5),
                         Color.gray.opacity(0.3)
@@ -160,7 +166,7 @@ struct TrendingTopicLobbyView: View {
                 .frame(width: 180, height: 56)
                 .cornerRadius(28)
                 .shadow(
-                    color: vm.isHost ? Color("DarkBlue").opacity(0.5) : Color.gray.opacity(0.2),
+                    color: vm.isHost ? Color(hex: "56805D").opacity(0.5) : Color.gray.opacity(0.2),
                     radius: 15,
                     x: 0,
                     y: 8
@@ -183,7 +189,6 @@ struct TrendingTopicLobbyView: View {
     }
     
     private func rotationForIndex(_ index: Int) -> Double {
-        // Create different tilts for each position
         let tilts = [-12.0, 8.0, -15.0, 10.0, -8.0, 12.0, -10.0, 15.0]
         return tilts[index % tilts.count]
     }
@@ -198,21 +203,21 @@ struct TrendingTopicLobbyView: View {
     }
 }
 
-// MARK: - Player Card Circular for Trending Topic
-struct TTPlayerCardCircular: View {
-    let player: TTPlayer
+// MARK: - Player Card Circular for Unpopular Opinion
+struct UOPlayerCardCircular: View {
+    let player: UOPlayer
     let appeared: Bool
     let rotation: Double
     
     var body: some View {
         VStack(spacing: 6) {
             // Card with animation
-            Image("TrendingTopicsFront")
+            Image("unpopularOpinionFront")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 75, height: 75)
                 .rotationEffect(.degrees(rotation))
-                .shadow(color: Color("DarkBlue").opacity(0.35), radius: 10, x: 0, y: 6)
+                .shadow(color: Color(hex: "56805D").opacity(0.35), radius: 10, x: 0, y: 6)
                 .scaleEffect(appeared ? 1.0 : 0.5)
                 .opacity(appeared ? 1.0 : 0.0)
             
@@ -235,17 +240,17 @@ struct TTPlayerCardCircular: View {
 
 #Preview {
     NavigationStack {
-        TrendingTopicLobbyView(
-            vm: TrendingTopicLobbyVM(
-                room: TTRoom(
+        UnpopularOpinionLobbyView(
+            vm: UnpopularOpinionLobbyVM(
+                room: UORoom(
                     code: "12345",
                     players: [
-                        TTPlayer(name: "حصة"),
-                        TTPlayer(name: "حنين"),
-                        TTPlayer(name: "لينا"),
-                        TTPlayer(name: "نورة"),
-                        TTPlayer(name: "سارة"),
-                        TTPlayer(name: "مها")
+                        UOPlayer(name: "حصة"),
+                        UOPlayer(name: "حنين"),
+                        UOPlayer(name: "لينا"),
+                        UOPlayer(name: "نورة"),
+                        UOPlayer(name: "سارة"),
+                        UOPlayer(name: "مها")
                     ]
                 ),
                 isHost: true

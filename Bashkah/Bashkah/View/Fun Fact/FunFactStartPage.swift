@@ -1,19 +1,22 @@
 //
-//  TrendingTopicStartView.swift
-//  Bashkah
+//  FunFactStartPage.swift
+//  Bashkah - Fun Fact Game
 //
-//  Created by Najd Alsabi on 16/08/1447 AH.
+//  صفحة البداية للعبة هات العلم
+//  Created by Hneen on 23/08/1447 AH.
 //
 
 import SwiftUI
 
-struct TrendingTopicStartView: View {
+struct FunFactStartPage: View {
+    @StateObject private var viewModel = FunFactViewModel()
     @AppStorage("playerName") private var playerName: String = ""
+    
     @State private var logoScale: CGFloat = 0.8
     @State private var logoRotation: Double = -5
     @State private var buttonScale1: CGFloat = 1.0
     @State private var buttonScale2: CGFloat = 1.0
-
+    
     var body: some View {
         ZStack {
             // Background with gradient
@@ -48,7 +51,27 @@ struct TrendingTopicStartView: View {
             routeDestination(for: route)
         }
         .onAppear {
+            // Set player name from UserDefaults
+            if !playerName.isEmpty {
+                viewModel.currentPlayer = FunFactPlayer(
+                    name: playerName,
+                    deviceID: UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+                )
+            }
             startAnimations()
+        }
+    }
+    
+    // MARK: - Route Destination
+    @ViewBuilder
+    private func routeDestination(for route: AppRoute) -> some View {
+        switch route {
+        case .funFactWriting:
+            FunFactWritingView(viewModel: viewModel)
+        case .funFactJoin:
+            FunFactJoinRoom(viewModel: viewModel)
+        default:
+            EmptyView()
         }
     }
     
@@ -57,18 +80,19 @@ struct TrendingTopicStartView: View {
         HStack {
             Spacer()
             
-            NavigationLink(value: AppRoute.trendingStart) {
+            NavigationLink(value: AppRoute.funFactStart) {
                 ZStack {
+                    // Gradient background
                     LinearGradient(
-                        colors: [Color("DarkBlue").opacity(0.3), Color("DarkBlue").opacity(0.1)],
+                        colors: [Color("Orange").opacity(0.3), Color("Orange").opacity(0.1)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                     .frame(width: 40, height: 40)
                     .cornerRadius(20)
                     
-                    Image(systemName: "chevron.forward")
-                        .foregroundColor(Color("DarkBlue"))
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(Color("Orange"))
                         .font(.system(size: 18, weight: .bold))
                 }
             }
@@ -79,38 +103,33 @@ struct TrendingTopicStartView: View {
     
     // MARK: - Logo View with animation
     private var logoView: some View {
-        Image("TrendingTopicsPage")
+        Image("funFact 1")
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(width: 269, height: 269)
             .scaleEffect(logoScale)
             .rotationEffect(.degrees(logoRotation))
-            .shadow(color: Color("DarkBlue").opacity(0.3), radius: 20, x: 0, y: 10)
+            .shadow(color: Color("Orange").opacity(0.3), radius: 20, x: 0, y: 10)
     }
     
     // MARK: - Action Buttons with gradient and animation
     private var actionButtons: some View {
         VStack(spacing: 18) {
             // Create New Game Button
-            NavigationLink(value: AppRoute.trendingLobby(
-                room: TTRoom(
-                    code: String(format: "%05d", Int.random(in: 10000...99999)),
-                    players: [TTPlayer(name: playerName)]
-                ),
-                isHost: true
-            )) {
+            NavigationLink(value: AppRoute.funFactWriting) {
                 ZStack {
+                    // Gradient background
                     LinearGradient(
                         colors: [
-                            Color("DarkBlue"),
-                            Color("DarkBlue").opacity(0.8)
+                            Color("Orange"),
+                            Color("Orange").opacity(0.8)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                     .frame(width: 320, height: 58)
                     .cornerRadius(29)
-                    .shadow(color: Color("DarkBlue").opacity(0.5), radius: 15, x: 0, y: 8)
+                    .shadow(color: Color("Orange").opacity(0.5), radius: 15, x: 0, y: 8)
                     
                     Text("ابدأ لعبة جديدة")
                         .font(.system(size: 18, weight: .bold))
@@ -118,6 +137,7 @@ struct TrendingTopicStartView: View {
                 }
             }
             .simultaneousGesture(TapGesture().onEnded {
+                viewModel.createRoom(playerName: playerName)
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                     buttonScale1 = 0.95
                 }
@@ -130,19 +150,20 @@ struct TrendingTopicStartView: View {
             .scaleEffect(buttonScale1)
             
             // Join Game Button
-            NavigationLink(value: AppRoute.trendingJoin) {
+            NavigationLink(value: AppRoute.funFactJoin) {
                 ZStack {
+                    // Gradient background
                     LinearGradient(
                         colors: [
-                            Color("DarkBlue"),
-                            Color("DarkBlue").opacity(0.8)
+                            Color("Orange"),
+                            Color("Orange").opacity(0.8)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                     .frame(width: 320, height: 58)
                     .cornerRadius(29)
-                    .shadow(color: Color("DarkBlue").opacity(0.5), radius: 15, x: 0, y: 8)
+                    .shadow(color: Color("Orange").opacity(0.5), radius: 15, x: 0, y: 8)
                     
                     Text("دخول لعبة")
                         .font(.system(size: 18, weight: .bold))
@@ -150,6 +171,7 @@ struct TrendingTopicStartView: View {
                 }
             }
             .simultaneousGesture(TapGesture().onEnded {
+                viewModel.startBrowsing()
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                     buttonScale2 = 0.95
                 }
@@ -160,21 +182,6 @@ struct TrendingTopicStartView: View {
                 }
             })
             .scaleEffect(buttonScale2)
-        }
-    }
-    
-    // MARK: - Route Destination
-    @ViewBuilder
-    private func routeDestination(for route: AppRoute) -> some View {
-        switch route {
-        case .trendingJoin:
-            TrendingTopicJoinView(vm: TrendingTopicJoinVM(displayName: playerName))
-        case .trendingLobby(let room, let isHost):
-            TrendingTopicLobbyView(vm: TrendingTopicLobbyVM(room: room, isHost: isHost))
-        case .trendingGame:
-            TrendingTopicGameView(vm: TrendingTopicGameVM())
-        default:
-            EmptyView()
         }
     }
     
@@ -205,6 +212,6 @@ struct TrendingTopicStartView: View {
 
 #Preview {
     NavigationStack {
-        TrendingTopicStartView()
+        FunFactStartPage()
     }
 }

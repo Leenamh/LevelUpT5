@@ -89,7 +89,7 @@ struct StartPageView: View {
                             .frame(width: geo.size.width,
                                    height: geo.size.height)
                             .ignoresSafeArea()
-                            .background(Color("BG"))
+//                            .background(Color("BG"))
                     } else {
 //                        Color("BG")
 //                            .ignoresSafeArea()

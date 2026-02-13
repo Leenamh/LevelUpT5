@@ -23,7 +23,7 @@ class MultipeerManager: NSObject, ObservableObject {
     
     // MARK: - Constants
     private let serviceType = "bashkah-game"
-    private let maxPeers = 7  // Host + 7 players = 8 total
+    private let maxPeers = 5  // Host + 7 players = 8 total
     
     // MARK: - Callbacks
     var onMessageReceived: ((FunFactMessage) -> Void)?
@@ -78,17 +78,22 @@ class MultipeerManager: NSObject, ObservableObject {
     
     // MARK: - Join Room
     func joinRoom(roomNumber: String) {
-        guard let hostPeer = availableRooms[roomNumber] else {
-            print("❌ Room \(roomNumber) not found")
-            return
-        }
-        
         currentRoomNumber = roomNumber
         connectionStatus = .connecting
         
-        // Invite host
-        browser?.invitePeer(hostPeer, to: session, withContext: nil, timeout: 30)
-        print("📤 Sent join request to room: \(roomNumber)")
+        // For dummy app: simulate successful connection after delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.connectionStatus = .connected
+            print("✅ Dummy mode: Simulated join to room: \(roomNumber)")
+        }
+        
+        // Real multiplayer logic (won't work in dummy mode)
+        if let hostPeer = availableRooms[roomNumber] {
+            browser?.invitePeer(hostPeer, to: session, withContext: nil, timeout: 30)
+            print("📤 Sent join request to room: \(roomNumber)")
+        } else {
+            print("⚠️ Room \(roomNumber) not found in available rooms - using dummy mode")
+        }
     }
     
     // MARK: - Send Message
