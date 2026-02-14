@@ -6,7 +6,7 @@ struct StartPageView: View {
     
     @State private var isFrontCardFlipped = false
     @State private var currentFrontCard: CardType?
-    @State private var navigateTo: CardType?   // ✅ Navigation trigger
+    @State private var navigateTo: CardType?
     
     var body: some View {
         ZStack {
@@ -37,10 +37,8 @@ struct StartPageView: View {
                         }
                     )
                     .scaleEffect(index == 0 ? 1 : 0.88)
-                    .offset(
-                        x: xOffset(for: index),
-                        y: yOffset(for: index)
-                    )
+                    .offset(x: xOffset(for: index),
+                            y: yOffset(for: index))
                     .rotationEffect(
                         .degrees(rotation(for: index)),
                         anchor: .bottom
@@ -58,15 +56,17 @@ struct StartPageView: View {
                 Spacer()
             }
             
-            // MARK: - PLAY BUTTON
+            // MARK: - BUTTON
             if isFrontCardFlipped, let card = currentFrontCard {
                 VStack {
                     Spacer()
                     
                     Button(action: {
-                        navigateTo = card   // ✅ Navigate
+                        if card == .fact {
+                            navigateTo = card   // التنقل فقط للفكت
+                        }
                     }) {
-                        Text("اللعب")
+                        Text(buttonTitle(for: card))
                             .font(.system(size: 25, weight: .bold))
                             .foregroundColor(.white)
                             .frame(width: 208, height: 48)
@@ -79,7 +79,6 @@ struct StartPageView: View {
             }
         }
         
-        // MARK: - BACKGROUND
         .background(
             GeometryReader { geo in
                 Group {
@@ -89,15 +88,11 @@ struct StartPageView: View {
                             .frame(width: geo.size.width,
                                    height: geo.size.height)
                             .ignoresSafeArea()
-                    } else {
-                        Color("BG")
-                            .ignoresSafeArea()
                     }
                 }
             }
         )
         
-        // MARK: - NAVIGATION
         .navigationBarBackButtonHidden(true)
         .disableSwipeBack()
         .navigationDestination(item: $navigateTo) { card in
@@ -112,6 +107,27 @@ struct StartPageView: View {
         }
     }
     
+    // MARK: - Button Title
+    
+    private func buttonTitle(for card: CardType) -> String {
+        switch card {
+        case .fact:
+            return "ابدأ"
+        case .trending, .unpopular:
+            return "قريبًا"
+        }
+    }
+    
+    // MARK: - Button Color
+    
+    private func buttonColor(for card: CardType) -> Color {
+        switch card {
+        case .fact:
+            return Color("Orange")
+        case .trending, .unpopular:
+            return Color.gray
+        }
+    }
     
     // MARK: - Background Mapping
     
@@ -123,19 +139,6 @@ struct StartPageView: View {
             return "TrendingTopicsBG"
         case .unpopular:
             return "unpopularOpinionBG"
-        }
-    }
-    
-    // MARK: - Button Color
-    
-    private func buttonColor(for card: CardType) -> Color {
-        switch card {
-        case .fact:
-            return Color("Orange")
-        case .trending:
-            return Color("DarkBlue")
-        case .unpopular:
-            return Color("Green2")
         }
     }
     

@@ -84,3 +84,5 @@ struct StartPageCardView: View {
         onFlipChanged(false)
     }
 }
+
+

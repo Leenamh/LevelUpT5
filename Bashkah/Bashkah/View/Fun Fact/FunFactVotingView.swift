@@ -2,8 +2,7 @@
 //  FunFactVotingView.swift
 //  Bashkah - Fun Fact Game
 //
-//  صفحة التصويت - عرض الحقيقة والتصويت
-//  Created by Hneen on 23/08/1447 AH.
+//  Updated with 5-second timer and coins - 15/02/2026
 //
 
 import SwiftUI
@@ -12,6 +11,9 @@ struct FunFactVotingView: View {
     @ObservedObject var viewModel: FunFactViewModel
     @State private var navigateToWinners = false
     @State private var cardScale: CGFloat = 0.9
+    @State private var totalFactsCount: Int = 0
+    @State private var timeRemaining: Int = 5
+    @State private var timerActive: Bool = false
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -28,11 +30,16 @@ struct FunFactVotingView: View {
             .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Header
+                // Header (without room number)
                 headerView
                 
+                // Timer
+                if timerActive && !viewModel.showingAnswer {
+                    timerView
+                }
+                
                 Spacer()
-                    .frame(height: 25)
+                    .frame(height: 15)
                 
                 // Fun Fact Card
                 funFactCardView
@@ -45,7 +52,9 @@ struct FunFactVotingView: View {
                 Spacer()
                 
                 // Player Buttons
-                playerButtonsView
+                if !viewModel.showingAnswer {
+                    playerButtonsView
+                }
                 
                 Spacer()
                     .frame(height: 50)
@@ -58,26 +67,45 @@ struct FunFactVotingView: View {
         .onChange(of: viewModel.gameRoom?.currentPhase) { newPhase in
             if newPhase == .results {
                 navigateToWinners = true
+            } else if newPhase == .voting {
+                // Reset timer for new fact
+                resetTimer()
+            }
+        }
+        .onChange(of: viewModel.showingAnswer) { showing in
+            if showing {
+                timerActive = false
             }
         }
         .onAppear {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
                 cardScale = 1.0
             }
+            
+            // Load current fact if not loaded
+            if viewModel.currentDisplayFact == nil {
+                viewModel.loadCurrentFact()
+            }
+            
+            // Load total facts count
+            loadTotalFactsCount()
+            
+            // Start timer
+            startTimer()
         }
     }
     
-    // MARK: - Header View
+    // MARK: - Header View (No Room Number)
     private var headerView: some View {
         HStack {
-            // Score Display with icon
+            // Score Display with coin icon
             HStack(spacing: 8) {
                 ZStack {
                     Circle()
                         .fill(Color.yellow.opacity(0.2))
                         .frame(width: 50, height: 50)
                     
-                    Image(systemName: "dollarsign.circle.fill")
+                    Image(systemName: "bitcoinsign.circle.fill")
                         .font(.system(size: 26))
                         .foregroundColor(.yellow)
                 }
@@ -91,13 +119,13 @@ struct FunFactVotingView: View {
             
             // Exit button
             Button(action: {
-                dismiss()
+                viewModel.showExitAlert = true
             }) {
                 ZStack {
                     Circle()
                         .fill(
                             LinearGradient(
-                                colors: [Color("Orange").opacity(0.3), Color("Orange").opacity(0.1)],
+                                colors: [Color.red.opacity(0.3), Color.red.opacity(0.1)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
@@ -105,13 +133,84 @@ struct FunFactVotingView: View {
                         .frame(width: 44, height: 44)
                     
                     Image(systemName: "rectangle.portrait.and.arrow.right")
-                        .foregroundColor(Color("Orange"))
+                        .foregroundColor(.red)
                         .font(.system(size: 20, weight: .bold))
                 }
             }
         }
         .padding(.horizontal, 20)
         .padding(.top, 50)
+        .alert("خروج من الغرفة", isPresented: $viewModel.showExitAlert) {
+            Button("إلغاء", role: .cancel) { }
+            Button("خروج", role: .destructive) {
+                viewModel.handleLeaveRoom()
+                dismiss()
+            }
+        } message: {
+            Text("هل أنت متأكد من الخروج من الغرفة؟")
+        }
+    }
+    
+    // MARK: - Timer View
+    private var timerView: some View {
+        ZStack {
+            // Circular progress
+            Circle()
+                .stroke(Color.gray.opacity(0.2), lineWidth: 8)
+                .frame(width: 80, height: 80)
+            
+            Circle()
+                .trim(from: 0, to: CGFloat(timeRemaining) / 5.0)
+                .stroke(
+                    timeRemaining <= 2 ? Color.red : Color("Orange"),
+                    style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                )
+                .frame(width: 80, height: 80)
+                .rotationEffect(.degrees(-90))
+                .animation(.linear(duration: 1), value: timeRemaining)
+            
+            // Time number
+            VStack(spacing: 2) {
+                Text("\(timeRemaining)")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundColor(timeRemaining <= 2 ? .red : Color("Orange"))
+                
+                Text("ثانية")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.gray)
+            }
+        }
+        .padding(.top, 10)
+    }
+    
+    // MARK: - Timer Logic
+    private func startTimer() {
+        timeRemaining = 5
+        timerActive = true
+        
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+            if !timerActive || viewModel.showingAnswer {
+                timer.invalidate()
+                return
+            }
+            
+            if timeRemaining > 0 {
+                timeRemaining -= 1
+            } else {
+                timer.invalidate()
+                // Time's up - auto-submit if not voted
+                if viewModel.currentPlayer?.hasVoted == false && !viewModel.showingAnswer {
+                    // Auto-submit random vote (or no vote)
+                    viewModel.handleTimeUp()
+                }
+            }
+        }
+    }
+    
+    private func resetTimer() {
+        timeRemaining = 5
+        timerActive = true
+        startTimer()
     }
     
     // MARK: - Fun Fact Card View
@@ -128,8 +227,8 @@ struct FunFactVotingView: View {
                 Spacer()
                     .frame(height: 100)
                 
-                // Fact Text
-                if let currentFact = viewModel.gameRoom?.currentFact {
+                // Fact Text - from Firebase
+                if let currentFact = viewModel.currentDisplayFact {
                     Text(currentFact.text)
                         .font(.system(size: 18, weight: .medium))
                         .foregroundColor(.black)
@@ -145,9 +244,9 @@ struct FunFactVotingView: View {
                 Spacer()
                     .frame(height: 20)
                 
-                // Card Counter
+                // Card Counter - from Firebase
                 if let room = viewModel.gameRoom {
-                    Text("\(room.currentFactIndex + 1) / \(room.allFacts.count)")
+                    Text("\(room.currentFactIndex + 1) / \(totalFactsCount)")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.gray)
                         .padding(.horizontal, 20)
@@ -165,10 +264,27 @@ struct FunFactVotingView: View {
         .scaleEffect(cardScale)
     }
     
+    // MARK: - Load Total Facts Count
+    private func loadTotalFactsCount() {
+        guard let roomId = viewModel.firebaseManager.currentRoom?.roomId else { return }
+        
+        viewModel.firebaseManager.db.collection("gameRooms")
+            .document(roomId)
+            .collection("facts")
+            .getDocuments { snapshot, error in
+                if let count = snapshot?.documents.count {
+                    DispatchQueue.main.async {
+                        self.totalFactsCount = count
+                    }
+                }
+            }
+    }
+    
     // MARK: - Answer Section
     private var answerSection: some View {
-        VStack(spacing: 10) {
-            if let currentFact = viewModel.gameRoom?.currentFact {
+        VStack(spacing: 15) {
+            if let currentFact = viewModel.currentDisplayFact {
+                // Correct answer display
                 HStack(spacing: 10) {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(Color("Orange"))
@@ -203,15 +319,55 @@ struct FunFactVotingView: View {
                         )
                 )
                 .padding(.horizontal, 40)
-                .padding(.top, 15)
+                
+                // Coin reward message
+                if let selectedVote = viewModel.selectedVote,
+                   selectedVote.uuidString == currentFact.playerID.uuidString {
+                    // Correct answer
+                    HStack(spacing: 8) {
+                        Image(systemName: "bitcoinsign.circle.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(.yellow)
+                        
+                        Text("+1 عملة")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.green)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(
+                        Capsule()
+                            .fill(Color.green.opacity(0.1))
+                    )
+                    .transition(.scale.combined(with: .opacity))
+                } else if viewModel.currentPlayer?.hasVoted == true {
+                    // Wrong answer
+                    HStack(spacing: 8) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(.red)
+                        
+                        Text("إجابة خاطئة")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.red)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(
+                        Capsule()
+                            .fill(Color.red.opacity(0.1))
+                    )
+                    .transition(.scale.combined(with: .opacity))
+                }
             }
         }
+        .padding(.top, 10)
     }
     
     // MARK: - Player Buttons View
     private var playerButtonsView: some View {
-        let players = viewModel.gameRoom?.players ?? []
-        let currentFact = viewModel.gameRoom?.currentFact
+        let players = viewModel.firebaseManager.connectedPlayers
+        let currentFact = viewModel.currentDisplayFact
         
         return VStack(spacing: 12) {
             ForEach(0..<(players.count + 1) / 2, id: \.self) { row in
@@ -220,28 +376,36 @@ struct FunFactVotingView: View {
                     
                     if startIndex < players.count {
                         AnimatedVoteButton(
-                            player: players[startIndex],
-                            isSelected: viewModel.selectedVote == players[startIndex].id,
-                            isCorrect: currentFact?.playerID == players[startIndex].id,
+                            playerName: players[startIndex].name,
+                            playerId: players[startIndex].id,
+                            isSelected: viewModel.selectedVote?.uuidString == players[startIndex].id,
+                            isCorrect: currentFact?.playerID.uuidString == players[startIndex].id,
                             showAnswer: viewModel.showingAnswer,
-                            canVote: viewModel.currentPlayer?.hasVoted == false
+                            canVote: viewModel.currentPlayer?.hasVoted == false && timeRemaining > 0
                         ) {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                                viewModel.submitVote(chosenPlayerID: players[startIndex].id)
+                                if let uuid = UUID(uuidString: players[startIndex].id) {
+                                    viewModel.submitVote(chosenPlayerID: uuid)
+                                    timerActive = false
+                                }
                             }
                         }
                     }
                     
                     if startIndex + 1 < players.count {
                         AnimatedVoteButton(
-                            player: players[startIndex + 1],
-                            isSelected: viewModel.selectedVote == players[startIndex + 1].id,
-                            isCorrect: currentFact?.playerID == players[startIndex + 1].id,
+                            playerName: players[startIndex + 1].name,
+                            playerId: players[startIndex + 1].id,
+                            isSelected: viewModel.selectedVote?.uuidString == players[startIndex + 1].id,
+                            isCorrect: currentFact?.playerID.uuidString == players[startIndex + 1].id,
                             showAnswer: viewModel.showingAnswer,
-                            canVote: viewModel.currentPlayer?.hasVoted == false
+                            canVote: viewModel.currentPlayer?.hasVoted == false && timeRemaining > 0
                         ) {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                                viewModel.submitVote(chosenPlayerID: players[startIndex + 1].id)
+                                if let uuid = UUID(uuidString: players[startIndex + 1].id) {
+                                    viewModel.submitVote(chosenPlayerID: uuid)
+                                    timerActive = false
+                                }
                             }
                         }
                     }
@@ -254,7 +418,8 @@ struct FunFactVotingView: View {
 
 // MARK: - Animated Vote Button
 struct AnimatedVoteButton: View {
-    let player: FunFactPlayer
+    let playerName: String
+    let playerId: String
     let isSelected: Bool
     let isCorrect: Bool
     let showAnswer: Bool
@@ -306,7 +471,7 @@ struct AnimatedVoteButton: View {
             }
         }) {
             HStack(spacing: 8) {
-                Text(player.name)
+                Text(playerName)
                     .font(.system(size: 17, weight: .bold))
                     .foregroundColor(.white)
                 
@@ -331,4 +496,13 @@ struct AnimatedVoteButton: View {
     }
 }
 
-
+#Preview {
+    NavigationStack {
+        FunFactVotingView(viewModel: {
+            let vm = FunFactViewModel()
+            vm.currentPlayer = FunFactPlayer(name: "حنين", deviceID: "test", isHost: true)
+            vm.gameRoom = FunFactRoom(roomNumber: "12345", players: [], hostDeviceID: "test")
+            return vm
+        }())
+    }
+}

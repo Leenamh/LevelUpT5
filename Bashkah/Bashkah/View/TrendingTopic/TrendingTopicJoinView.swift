@@ -159,7 +159,7 @@ struct TrendingTopicJoinView: View {
                     y: 8
                 )
                 
-                Text("دخول اللعبة")
+                Text("دخول ة")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
             }

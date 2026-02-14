@@ -5,6 +5,7 @@ final class SplashPageViewModel: ObservableObject {
     @Published var spreadCards = false
     @Published var showLogo = false
     @Published var goToStartPage = false
+    @Published var goToIntro = false
 
     let cards: [SplashCard] = [
         SplashCard(imageName: "OrangeCard", order: 0),
@@ -27,6 +28,11 @@ final class SplashPageViewModel: ObservableObject {
     func zIndex(for card: SplashCard) -> Double {
         card.order == 2 ? 3 : card.order == 0 ? 2 : 1
     }
+    
+    // ✅ Check if user already exists
+    private func hasExistingPlayer() -> Bool {
+        return UserDefaults.standard.string(forKey: "playerId") != nil
+    }
 
     func startAnimation() {
 
@@ -42,9 +48,15 @@ final class SplashPageViewModel: ObservableObject {
             self.showLogo = true
         }
 
-        // 3️⃣ Navigate after 3 seconds from logo
+        // 3️⃣ Navigate based on whether player exists
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.9) {
-            self.goToStartPage = true
+            if self.hasExistingPlayer() {
+                // ✅ Player exists, go directly to StartPage
+                self.goToStartPage = true
+            } else {
+                // ✅ No player, go to Intro to get name
+                self.goToIntro = true
+            }
         }
     }
 }

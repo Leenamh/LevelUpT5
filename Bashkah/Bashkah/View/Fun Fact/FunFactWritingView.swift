@@ -2,8 +2,7 @@
 //  FunFactWritingView.swift
 //  Bashkah - Fun Fact Game
 //
-//  صفحة كتابة الحقائق (5 بطاقات)
-//  Created by Hneen on 23/08/1447 AH.
+//  Updated with waiting message and auto-navigation - 15/02/2026
 //
 
 import SwiftUI
@@ -11,7 +10,7 @@ import SwiftUI
 struct FunFactWritingView: View {
     @ObservedObject var viewModel: FunFactViewModel
     @State private var navigateToJoker = false
-    @State private var navigateToOpinion = false
+    @State private var navigateToWaiting = false
     @State private var cardScale: CGFloat = 0.9
     @State private var buttonScale: CGFloat = 1.0
     @Environment(\.dismiss) var dismiss
@@ -49,8 +48,8 @@ struct FunFactWritingView: View {
         .navigationDestination(isPresented: $navigateToJoker) {
             FunFactJokerCard(viewModel: viewModel)
         }
-        .navigationDestination(isPresented: $navigateToOpinion) {
-            FunFactOpinion(viewModel: viewModel)
+        .navigationDestination(isPresented: $navigateToWaiting) {
+            FunFactWaitingView(viewModel: viewModel)
         }
         .onAppear {
             // Load saved facts if any
@@ -71,26 +70,34 @@ struct FunFactWritingView: View {
             Spacer()
             
             Button(action: {
-                viewModel.leaveRoom()
-                dismiss()
+                viewModel.showExitAlert = true
             }) {
                 ZStack {
                     LinearGradient(
-                        colors: [Color("Orange").opacity(0.3), Color("Orange").opacity(0.1)],
+                        colors: [Color.red.opacity(0.3), Color.red.opacity(0.1)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                     .frame(width: 40, height: 40)
                     .cornerRadius(20)
                     
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(Color("Orange"))
+                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                        .foregroundColor(.red)
                         .font(.system(size: 18, weight: .bold))
                 }
             }
         }
         .padding(.horizontal, 20)
         .padding(.top, 50)
+        .alert("خروج من الغرفة", isPresented: $viewModel.showExitAlert) {
+            Button("إلغاء", role: .cancel) { }
+            Button("خروج", role: .destructive) {
+                viewModel.handleLeaveRoom()
+                dismiss()
+            }
+        } message: {
+            Text("هل أنت متأكد من الخروج من الغرفة؟")
+        }
     }
     
     // MARK: - Room Number View
@@ -132,7 +139,7 @@ struct FunFactWritingView: View {
                     )
             )
         }
-        .padding(.top, -20) // رفعناه فوق
+        .padding(.top, -20)
     }
     
     // MARK: - Fun Fact Card
@@ -166,7 +173,7 @@ struct FunFactWritingView: View {
                         .font(.system(size: 17))
                         .multilineTextAlignment(.center)
                         .lineLimit(8...12)
-                        .tint(Color("Orange")) // 👈 Orange cursor
+                        .tint(Color("Orange"))
                         .padding(.horizontal, 50)
                     
                     Spacer()
@@ -267,7 +274,7 @@ struct FunFactWritingView: View {
                 }
             }
         } else {
-            // Submit facts
+            // Submit all 5 facts to Firebase
             viewModel.submitFacts()
             
             // Navigate based on joker status
@@ -275,7 +282,7 @@ struct FunFactWritingView: View {
                 if viewModel.isJoker {
                     navigateToJoker = true
                 } else {
-                    navigateToOpinion = true
+                    navigateToWaiting = true
                 }
             }
         }

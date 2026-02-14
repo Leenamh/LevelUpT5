@@ -1,9 +1,8 @@
 //
 //  FunFactJoinRoom.swift
-//  Bashkah - Fun Fact Game
+//  Bashkah
 //
-//  صفحة الانضمام للغرفة
-//  Created by Hneen on 23/08/1447 AH.
+//  Migrated to Firebase - 14/02/2026
 //
 
 import SwiftUI
@@ -12,7 +11,7 @@ struct FunFactJoinRoom: View {
     @ObservedObject var viewModel: FunFactViewModel
     @State private var roomNumber: String = ""
     @State private var showInvalidAlert = false
-    @State private var navigateToWriting = false
+    @State private var navigateToOpinion = false
     @State private var logoScale: CGFloat = 0.8
     @State private var logoRotation: Double = -5
     @State private var buttonScale: CGFloat = 1.0
@@ -56,13 +55,13 @@ struct FunFactJoinRoom: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        .navigationDestination(isPresented: $navigateToWriting) {
-            FunFactWritingView(viewModel: viewModel)
+        .navigationDestination(isPresented: $navigateToOpinion) {
+            FunFactOpinion(viewModel: viewModel)
         }
         .alert("خطأ", isPresented: $showInvalidAlert) {
             Button("حسناً", role: .cancel) { }
         } message: {
-            Text("رقم الغرفة يجب أن يكون 5 أرقام")
+            Text(viewModel.errorMessage ?? "لم يتم العثور على الغرفة")
         }
         .onAppear {
             startAnimations()
@@ -173,13 +172,18 @@ struct FunFactJoinRoom: View {
                     y: 8
                 )
                 
-                Text("دخول اللعبة")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.white)
+                if viewModel.isLoading {
+                    ProgressView()
+                        .tint(.white)
+                } else {
+                    Text("دخول اللعبة")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                }
             }
         }
         .scaleEffect(buttonScale)
-        .disabled(!isRoomNumberValid)
+        .disabled(!isRoomNumberValid || viewModel.isLoading)
         .padding(.bottom, 60)
     }
     
@@ -211,17 +215,18 @@ struct FunFactJoinRoom: View {
     private func joinRoom() {
         let trimmed = roomNumber.trimmingCharacters(in: .whitespacesAndNewlines)
         
-        // No validation - accept any input
         guard !trimmed.isEmpty else { return }
-        
         guard let player = viewModel.currentPlayer else { return }
         
+        // Join room via Firebase
         viewModel.joinRoom(roomNumber: trimmed, playerName: player.name)
         
         // Wait for connection then navigate
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            if viewModel.gameRoom != nil {
-                navigateToWriting = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            if viewModel.gameRoom != nil && !viewModel.isLoading {
+                navigateToOpinion = true
+            } else if viewModel.errorMessage != nil {
+                showInvalidAlert = true
             }
         }
     }

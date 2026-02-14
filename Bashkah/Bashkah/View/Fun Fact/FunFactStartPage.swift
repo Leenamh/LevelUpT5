@@ -3,7 +3,9 @@ import SwiftUI
 struct FunFactStartPage: View {
     
     @StateObject private var viewModel = FunFactViewModel()
-    @AppStorage("playerName") private var playerName: String = ""
+    @State private var playerName: String = ""
+    @State private var navigateToOpinion = false
+    @State private var navigateToJoin = false
     @Environment(\.dismiss) private var dismiss
     
     @State private var logoScale: CGFloat = 0.8
@@ -46,37 +48,33 @@ struct FunFactStartPage: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        .navigationDestination(for: AppRoute.self) { route in
-            routeDestination(for: route)
+        .navigationDestination(isPresented: $navigateToOpinion) {
+            FunFactOpinion(viewModel: viewModel)
+        }
+        .navigationDestination(isPresented: $navigateToJoin) {
+            FunFactJoinRoom(viewModel: viewModel)
         }
         .onAppear {
-            if !playerName.isEmpty {
-                viewModel.currentPlayer = FunFactPlayer(
-                    name: playerName,
-                    deviceID: UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
-                )
-            }
+            loadPlayerInfo()
             startAnimations()
         }
     }
     
-    
-    // MARK: - Route Destination
-    
-    @ViewBuilder
-    private func routeDestination(for route: AppRoute) -> some View {
-        switch route {
-        case .funFactWriting:
-            FunFactWritingView(viewModel: viewModel)
+    // MARK: - Load Player Info
+    private func loadPlayerInfo() {
+        // Get player info from UserDefaults (set by IntroView)
+        if let name = UserDefaults.standard.string(forKey: "playerName"),
+           let playerId = UserDefaults.standard.string(forKey: "playerId") {
+            playerName = name
             
-        case .funFactJoin:
-            FunFactJoinRoom(viewModel: viewModel)
-            
-        default:
-            EmptyView()
+            // Create player object with Firebase playerId
+            viewModel.currentPlayer = FunFactPlayer(
+                name: name,
+                deviceID: playerId,
+                isHost: false
+            )
         }
     }
-    
     
     // MARK: - Back Button
     
@@ -128,25 +126,31 @@ struct FunFactStartPage: View {
     private var actionButtons: some View {
         VStack(spacing: 18) {
             
-            // Create New Game
-            NavigationLink(value: AppRoute.funFactWriting) {
-                gradientButton(title: "ابدأ لعبة جديدة")
-            }
-            .simultaneousGesture(TapGesture().onEnded {
+            // Create New Game - Navigate to FunFactOpinion
+            Button {
+                // Create room in Firebase
                 viewModel.createRoom(playerName: playerName)
                 animateButton($buttonScale1)
-            })
+                
+                // Navigate to FunFactOpinion
+                navigateToOpinion = true
+            } label: {
+                gradientButton(title: "ابدأ لعبة جديدة")
+            }
             .scaleEffect(buttonScale1)
             
             
-            // Join Game
-            NavigationLink(value: AppRoute.funFactJoin) {
-                gradientButton(title: "دخول لعبة")
-            }
-            .simultaneousGesture(TapGesture().onEnded {
+            // Join Game - Navigate to FunFactJoinRoom
+            Button {
+                // Start browsing for rooms
                 viewModel.startBrowsing()
                 animateButton($buttonScale2)
-            })
+                
+                // Navigate to FunFactJoinRoom
+                navigateToJoin = true
+            } label: {
+                gradientButton(title: "دخول لعبة")
+            }
             .scaleEffect(buttonScale2)
         }
     }
@@ -180,7 +184,7 @@ struct FunFactStartPage: View {
     }
     
     
-    // MARK: - Button Animation (FIXED)
+    // MARK: - Button Animation
     
     private func animateButton(_ scale: Binding<CGFloat>) {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {

@@ -44,10 +44,18 @@ struct SplashPageView: View {
                         }
                 }
             }
-            .navigationBarBackButtonHidden(true)   // 🚫 back button removed
+            .navigationBarBackButtonHidden(true)
+            
+            // ✅ Navigate to IntroView if no player exists
+            .navigationDestination(isPresented: $vm.goToIntro) {
+                IntroView()
+            }
+            
+            // ✅ Navigate to StartPageView if player exists
             .navigationDestination(isPresented: $vm.goToStartPage) {
                 StartPageView()
             }
+            
             .onAppear {
                 vm.startAnimation()
             }
