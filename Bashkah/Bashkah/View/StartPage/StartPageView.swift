@@ -62,11 +62,10 @@ struct StartPageView: View {
                     Spacer()
                     
                     Button(action: {
-                        if card == .fact {
-                            navigateTo = card   // التنقل فقط للفكت
-                        }
+                        // الآن جميع البطاقات قابلة للانتقال عند الضغط على "ابدأ"
+                        navigateTo = card
                     }) {
-                        Text(buttonTitle(for: card))
+                        Text("ابدأ")
                             .font(.system(size: 25, weight: .bold))
                             .foregroundColor(.white)
                             .frame(width: 208, height: 48)
@@ -107,30 +106,19 @@ struct StartPageView: View {
         }
     }
     
-    // MARK: - Button Title
-    
-    private func buttonTitle(for card: CardType) -> String {
-        switch card {
-        case .fact:
-            return "ابدأ"
-        case .trending, .unpopular:
-            return "قريبًا"
-        }
-    }
-    
-    // MARK: - Button Color
-    
+    // MARK: - Button Color logic
     private func buttonColor(for card: CardType) -> Color {
         switch card {
         case .fact:
             return Color("Orange")
-        case .trending, .unpopular:
-            return Color.gray
+        case .unpopular:
+            return Color("Green2") // استخدام اللون المطلوب لـ Opinion
+        case .trending:
+            return Color("DarkBlue") // استخدام اللون المطلوب لـ Topic
         }
     }
     
     // MARK: - Background Mapping
-    
     private func backgroundImage(for card: CardType) -> String {
         switch card {
         case .fact:
@@ -143,7 +131,6 @@ struct StartPageView: View {
     }
     
     // MARK: - Card Position Helpers
-    
     private func xOffset(for index: Int) -> CGFloat {
         switch index {
         case 1: return 60

@@ -151,8 +151,7 @@ struct UnpopularOpinionVotingView: View {
                     HStack(spacing: -8) {
                         Text("🍅")
                             .font(.system(size: 28))
-                        Text("🍅")
-                            .font(.system(size: 28))
+                        
                     }
                     
                     Text("ضد")
@@ -178,7 +177,7 @@ struct UnpopularOpinionVotingView: View {
                     vm.vote(agree: true)
                 }
             } label: {
-                Text("مع")
+                Text("مع 👌🏻")
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(.white)
                     .frame(width: 160, height: 60)
@@ -221,8 +220,8 @@ struct UnpopularOpinionVotingView: View {
                 room: UORoom(
                     code: "12345",
                     players: [
-                        UOPlayer(name: "حنين", opinion: "ايرون مان اقوى واحد"),
-                        UOPlayer(name: "نجد")
+                        UOPlayer(name: "", opinion: "القهوة افضل من الشاهي"),
+                        UOPlayer(name: "نجد", opinion: "ايرون مان اقوى واحد")
                     ]
                 ),
                 currentPlayerID: UUID()
