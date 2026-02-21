@@ -8,6 +8,7 @@ struct FunFactWritingView: View {
     @State private var cardScale: CGFloat = 0.9
     @State private var buttonScale: CGFloat = 1.0
     @Environment(\.dismiss) var dismiss
+    @FocusState private var isEditing: Bool   // ✅ Focus for keyboard control
 
     var body: some View {
         ZStack {
@@ -57,6 +58,19 @@ struct FunFactWritingView: View {
         .onChange(of: viewModel.shouldNavigateToVoting) { go in
             if go {
                 navigateToVoting = true
+            }
+        }
+        // ✅ Keyboard toolbar button (icon instead of text)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button {
+                    isEditing = false
+                } label: {
+                    Image(systemName: "keyboard.chevron.compact.down")
+                        .font(.system(size: 17, weight: .semibold))
+                }
+                .foregroundColor(Color("Orange"))
             }
         }
     }
@@ -169,6 +183,16 @@ struct FunFactWritingView: View {
                         .padding(.horizontal, 50)
                         // ✅ LOCK writing if voting has already started
                         .disabled(viewModel.phaseString == "voting")
+                        // ✅ Focus binding to control keyboard
+                        .focused($isEditing)
+                        // Start focused by default when entering this screen (optional)
+                        .onAppear {
+                            if viewModel.phaseString != "voting" {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                    isEditing = true
+                                }
+                            }
+                        }
 
                     Spacer()
                 }
@@ -187,6 +211,10 @@ struct FunFactWritingView: View {
             }
         }
         .scaleEffect(cardScale)
+        // Tap outside to dismiss keyboard
+        .onTapGesture {
+            isEditing = false
+        }
     }
 
     private var nextButton: some View {
@@ -197,6 +225,9 @@ struct FunFactWritingView: View {
 
         return Button(action: {
             guard hasText, !locked else { return }
+
+            // Dismiss keyboard when proceeding
+            isEditing = false
 
             withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                 buttonScale = 0.95
