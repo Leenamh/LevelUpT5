@@ -5,33 +5,33 @@
 //  Created by leena almusharraf on 13/02/2026.
 //
 
-
 import SwiftUI
 
 struct IntroView: View {
-    
+
     @Environment(\.dismiss) var dismiss
     @StateObject private var vm = IntroViewModel()
-    
+
     @State private var logoScale: CGFloat = 0.8
     @State private var logoRotation: Double = -5
-    
+    @State private var didAnimate = false
+
     var body: some View {
         ZStack {
-            
+
             LinearGradient(
                 colors: [Color("Background"), Color("Background").opacity(0.95)],
                 startPoint: .top,
                 endPoint: .bottom
             )
             .ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
-                
+
                 // Back Button
                 HStack {
                     Spacer()
-                    
+
                     Button(action: {
                         dismiss()
                     }) {
@@ -44,7 +44,7 @@ struct IntroView: View {
                             )
                             .frame(width: 40, height: 40)
                             .cornerRadius(20)
-                            
+
                             Image(systemName: "chevron.forward")
                                 .foregroundColor(Color("Orange"))
                                 .font(.system(size: 18, weight: .bold))
@@ -53,9 +53,9 @@ struct IntroView: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 50)
-                
+
                 Spacer().frame(height: 20)
-                
+
                 // Logo
                 Image("Logo")
                     .resizable()
@@ -67,15 +67,16 @@ struct IntroView: View {
                             radius: 20,
                             x: 0,
                             y: 10)
-                
+                    .drawingGroup() // يساعد يثبت الرندر مع الأنيميشن
+
                 Spacer().frame(height: 60)
-                
+
                 VStack(spacing: 15) {
-                    
+
                     Text("ادخل اسمك")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(Color("Orange"))
-                    
+
                     TextField("اسمك", text: $vm.nameInput)
                         .font(.system(size: 16, weight: .medium))
                         .multilineTextAlignment(.center)
@@ -83,38 +84,46 @@ struct IntroView: View {
                         .frame(width: 320, height: 55)
                         .background(Color.white)
                         .cornerRadius(27.5)
-                    
+
                     Button(action: {
                         vm.createPlayer()
                     }) {
                         ZStack {
                             LinearGradient(
                                 colors: [
-                                    canContinue ? Color("Orange")
-                                    : Color("Orange").opacity(0.4),
-                                    
-                                    canContinue ? Color("Orange").opacity(0.8)
-                                    : Color("Orange").opacity(0.2)
+                                    canContinue ? Color("Orange") : Color("Orange").opacity(0.4),
+                                    canContinue ? Color("Orange").opacity(0.8) : Color("Orange").opacity(0.2)
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                             .frame(width: 320, height: 58)
                             .cornerRadius(29)
-                            
-                            if vm.isLoading {
-                                ProgressView()
-                                    .tint(.white)
-                            } else {
+
+                            // ✅ محتوى ثابت (ما فيه تبديل View يسبب حركة)
+                            ZStack {
                                 Text("ابدأ")
                                     .font(.system(size: 18, weight: .bold))
                                     .foregroundColor(.white)
+                                    .opacity(vm.isLoading ? 0 : 1)
+
+                                ProgressView()
+                                    .tint(.white)
+                                    .opacity(vm.isLoading ? 1 : 0)
                             }
+                            .frame(width: 320, height: 58) // تثبيت المساحة
                         }
                     }
                     .disabled(!canContinue || vm.isLoading)
+
+                    // ✅ امنعي أي أنيميشن تلقائي على الزر بسبب تغيّر الحالات
+                    .transaction { t in
+                        t.animation = nil
+                    }
+                    .animation(nil, value: vm.isLoading)
+                    .animation(nil, value: canContinue)
                 }
-                
+
                 Spacer()
             }
         }
@@ -132,28 +141,29 @@ struct IntroView: View {
             Text(vm.errorMessage ?? "")
         }
         .onAppear {
+            guard !didAnimate else { return }
+            didAnimate = true
             startAnimations()
         }
     }
-    
+
     private var canContinue: Bool {
         !vm.nameInput.trimmingCharacters(in: .whitespaces).isEmpty
     }
-    
+
     private func startAnimations() {
-        withAnimation(.spring(response: 0.8,
-                              dampingFraction: 0.6)) {
+        withAnimation(.spring(response: 0.8, dampingFraction: 0.6)) {
             logoScale = 1.0
             logoRotation = 0
         }
-        
+
         withAnimation(
             Animation.easeInOut(duration: 3.0)
                 .repeatForever(autoreverses: true)
         ) {
             logoScale = 1.05
         }
-        
+
         withAnimation(
             Animation.easeInOut(duration: 4.0)
                 .repeatForever(autoreverses: true)
